@@ -35,6 +35,7 @@ function Dashboard() {
   const [bids, setBids] = useState([]);
   const [balance, setBalance] = useState(null);
 
+  // check the user balance
   useEffect(() => {
     if (isAuthenticated) {
       const fetchBalance = async () => {

@@ -1,24 +1,19 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Grid } from "@mui/material";
-import { Calendar } from "../components/ui/calendar";
 import { DatePicker } from "../components/ui/date-picker";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
-import { useEffect } from "react";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "../components/ui/card";
+import { Card, CardHeader, CardContent } from "../components/ui/card";
+import Socket from "../components/socket";
 import { set } from "date-fns";
 
 const PostBid = () => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [alertMessage, setAlertMessage] = useState("");
   const { user } = useAuth0();
   const [alertVisible, setAlertVisible] = useState(false);
-  const [operation, setOperation] = useState(null);
+
   const [formData, setFormData] = useState({
     itemName: "",
     price: "",
@@ -27,7 +22,6 @@ const PostBid = () => {
     bid_end_time: endDate,
     image: null,
   });
-
   const formatDateTime = (date) => {
     const d = new Date(date);
     const pad = (num) => (num < 10 ? `0${num}` : num);
@@ -47,11 +41,15 @@ const PostBid = () => {
     e.preventDefault();
     if (startDate >= endDate) {
       setAlertVisible(true);
+      setAlertMessage("Bidding end time must be after bidding start time.");
       return;
     }
-
+    if (startDate < Date.now() || endDate < Date.now()) {
+      setAlertVisible(true);
+      setAlertMessage("Bidding start and end time is invalid.");
+      return;
+    }
     setAlertVisible(false);
-    // Prepare form data for the backend
     try {
       const response = await fetch("http://localhost:8080/api/items", {
         method: "POST",
@@ -69,6 +67,7 @@ const PostBid = () => {
       });
 
       if (response.ok) {
+        // Reset form data
         setFormData({
           itemName: "",
           price: "",
@@ -77,8 +76,10 @@ const PostBid = () => {
           bid_start_time: new Date(),
           bid_end_time: new Date(),
         });
+        alert("Item posted successfully");
+        // Show success toast
       } else {
-        throw new Error("Error submitting form");
+        alert("Failed to post your item. Please try again later.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -98,16 +99,13 @@ const PostBid = () => {
             <Grid className="pb-4">
               <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>
-                  Bidding end time must be after bidding start time.
-                </AlertDescription>
+                <AlertDescription>{alertMessage}</AlertDescription>
               </Alert>
             </Grid>
           )}
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              {/* Item Name */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -119,7 +117,6 @@ const PostBid = () => {
                 />
               </Grid>
 
-              {/* Price */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -132,7 +129,6 @@ const PostBid = () => {
                 />
               </Grid>
 
-              {/* Description */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -146,7 +142,6 @@ const PostBid = () => {
                 />
               </Grid>
 
-              {/* Bidding Start Time */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom>
                   Set Bidding Start Time
@@ -154,7 +149,6 @@ const PostBid = () => {
                 <DatePicker onDateChange={setStartDate}></DatePicker>
               </Grid>
 
-              {/* Bidding End Time */}
               <Grid item xs={12}>
                 <Typography variant="h6" gutterBottom>
                   Set Bidding End Time
@@ -162,7 +156,6 @@ const PostBid = () => {
                 <DatePicker onDateChange={setEndDate}></DatePicker>
               </Grid>
 
-              {/* Image Upload */}
               <Grid item xs={12}>
                 <Button variant="contained" component="label">
                   Upload Image
@@ -180,7 +173,6 @@ const PostBid = () => {
                 )}
               </Grid>
 
-              {/* Submit Button */}
               <Grid item xs={12}>
                 <Button
                   type="submit"

@@ -7,9 +7,14 @@ import LoginButton from "./components/LoginButton";
 import LogoutButton from "./components/LogoutButton";
 import Dashboard from "./components/Dashboard";
 import PostBid from "./components/PostItem";
+import { Toaster } from "../src/components/ui/toaster";
+import { useToast } from "../src/hooks/use-toast";
+
+import { Button } from "../src/components/ui/button.jsx";
+
 const App = () => {
   const { isAuthenticated, user, getIdTokenClaims } = useAuth0();
-
+  const { toast } = useToast();
   useEffect(() => {
     const saveUser = async () => {
       if (isAuthenticated) {
