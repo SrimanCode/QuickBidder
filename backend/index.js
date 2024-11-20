@@ -3,6 +3,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const mysql = require("mysql2");
 const dotenv = require("dotenv");
+const redis = require("redis");
 const cors = require("cors");
 const { auth, requiresAuth } = require("express-openid-connect");
 const jwt = require("jsonwebtoken");
@@ -10,6 +11,15 @@ const jwks = require("jwks-rsa");
 
 // Load environment variables
 dotenv.config();
+require("./updateDB/cronJobs");
+const redisClient = redis.createClient({
+  host: process.env.REDIS_HOST || "redis://localhost:6379",
+});
+
+async () => {
+  await redisClient.connect();
+  console.log("Connected to Redis");
+};
 
 const config = {
   authRequired: false,
@@ -21,7 +31,6 @@ const config = {
 };
 
 const app = express();
-// auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config));
 
 const server = http.createServer(app);
@@ -120,19 +129,7 @@ app.get("/api/balance", async (req, res) => {
 
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
-  socket.on("newBid", async (data) => {
-    console.log("New bid received:", data);
-    try {
-      await db.query(
-        "INSERT INTO bids (user_id, item_id, amount) VALUES (?, ?, ?)",
-        [data.userId, data.itemId, data.amount]
-      );
-      console.log("Bid saved to database");
-      io.emit("updateBid", data);
-    } catch (err) {
-      console.error(err);
-    }
-  });
+  socket.on("newBid", async (data) => {});
 
   socket.on("disconnect", (reason) => {
     console.log(`User disconnected: ${socket.id}, reason: ${reason}`);
