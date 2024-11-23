@@ -22,7 +22,7 @@ import {
 } from "../components/ui/alert-dialog";
 import BidList from "./BidList";
 import BidForm from "./BidForm";
-
+import ActiveBids from "./activeBids";
 // Initialize socket outside the component
 const socket = io("http://localhost:8080", {
   autoConnect: true,
@@ -35,7 +35,6 @@ function Dashboard() {
   const [bids, setBids] = useState([]);
   const [balance, setBalance] = useState(null);
 
-  // check the user balance
   useEffect(() => {
     if (isAuthenticated) {
       const fetchBalance = async () => {
@@ -102,25 +101,12 @@ function Dashboard() {
       {/* Bid Form */}
       <Card className="bg-white border shadow-sm">
         <CardHeader>
-          <CardTitle>Place a Bid</CardTitle>
+          <CardTitle>All bids</CardTitle>
           <CardDescription>
             Fill out the form below to place a new bid.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <BidForm onNewBid={handleNewBid} />
-        </CardContent>
-      </Card>
-
-      {/* Bids List */}
-      <Card className="bg-white border shadow-sm">
-        <CardHeader>
-          <CardTitle>Live Bids</CardTitle>
-          <CardDescription>See all live bids in real-time.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <BidList bids={bids} />
-        </CardContent>
+        <ActiveBids />
       </Card>
 
       {/* Alert Dialog Example */}

@@ -44,7 +44,7 @@ const PostBid = () => {
       setAlertMessage("Bidding end time must be after bidding start time.");
       return;
     }
-    if (startDate < Date.now() || endDate < Date.now()) {
+    if (endDate < Date.now()) {
       setAlertVisible(true);
       setAlertMessage("Bidding start and end time is invalid.");
       return;
